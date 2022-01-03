@@ -47,6 +47,9 @@ public class DFSAController {
         }
     }
 
+    /*
+    Read a file and save the states in hashmap in save transition enter hashmap also
+     */
     public void ReadFile() throws IOException {
         FileChooser fC=new FileChooser();
         File file = fC.showOpenDialog(new Stage());
@@ -147,6 +150,10 @@ public class DFSAController {
         }
     }
 
+    /*
+    step 2 to convert for DFSA is this Removal of nondeterminism
+    via check each trans in the state if have more than one state for the same transition
+     */
     public void Removal_Of_NonDeterminism(String[] trans) {
         for (int j = 0; j < states.size(); j++) {
             States state = table.get(states.get(j));
@@ -191,6 +198,9 @@ public class DFSAController {
 
     }
 
+    /*
+    Rename the state which already new and have multiple state in this name
+     */
     public void Rename(String[] trans){
         for (int i=0;i<states.size();i++){
             States state=table.get(states.get(i));
@@ -224,6 +234,9 @@ public class DFSAController {
         }
     }
 
+    /*
+    step 3 to DFSA is Removal of non-accessible states
+     */
     public void Removal_of_Non_Accessible_States(String[] trans) {
         table.get(states.get(0)).setMarked(true);
         Recursion_Accessible(table.get(states.get(0)), trans);
@@ -243,6 +256,9 @@ public class DFSAController {
 
     }
 
+    /*
+    this recursion to ensure that checked all state again and again
+     */
     public void Recursion_Accessible(States s, String[] trans) {
         int count = 0;
         while (count != trans.length) {
@@ -254,6 +270,9 @@ public class DFSAController {
         }
     }
 
+    /*
+    final step for DFSA to merge all equivalent state
+     */
     public void Merging_Equivalent_States(String[] trans) {
         ArrayList<States> Final = new ArrayList<>();
         ArrayList<States> Non_Final = new ArrayList<>();
@@ -354,6 +373,10 @@ public class DFSAController {
 
     }
 
+
+     /*
+      this recursion to ensure that all feasible pairs checked again and again
+     */
     public void Recursion_Equivalent(String[] trans, States feasiblePairState) {
         feasiblePairs.get(feasiblePairState.getState()).setVisited(true);
         int count = 0;
@@ -393,6 +416,9 @@ public class DFSAController {
 
     }
 
+    /*
+    to check if their equivalent will merge it
+     */
     public void Merging(String[] trans){
         HashMap <String, LinkedList<String>> hashOfLinkedList=new HashMap<>();
         HashMap <String, LinkedList<String>> Sec_hashOfLinkedList=new HashMap<>();
@@ -506,6 +532,10 @@ public class DFSAController {
         else
             invisibleLabel.setText("Is rejected string");
     }
+
+    /*
+    check if string accepted or not
+     */
     public boolean CheckAcceptedString(TextField checkString){
         String UserString=checkString.getText();
         States state=Start;
