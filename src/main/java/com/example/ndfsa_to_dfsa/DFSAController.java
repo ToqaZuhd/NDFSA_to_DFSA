@@ -31,11 +31,18 @@ public class DFSAController {
 
     @FXML
     protected void onBrowseBtnClk() throws IOException {
+        table=new HashMap<>();
+        states=new ArrayList<>();
+        feasiblePairs=new HashMap<>();
+        feasiblePairsName=new ArrayList<>();
+        transitionTable.setText("");
         ReadFile();
 
         for (int i=0;i<states.size();i++){
             if (table.get(states.get(i))!=null){
-                transitionTable.appendText("\n state: "+states.get(i)+"\n");
+                transitionTable.appendText("\n state: "+states.get(i));
+                if (table.get(states.get(i)).isFinal_stat())
+                    transitionTable.appendText(" (Is Final state)"+"\n");
                 transitionTable.appendText("\n transition: ");
 
                 table.get(states.get(i)).getStates_trans().entrySet().forEach(entry->{
@@ -53,6 +60,7 @@ public class DFSAController {
     public void ReadFile() throws IOException {
         FileChooser fC=new FileChooser();
         File file = fC.showOpenDialog(new Stage());
+        System.out.println(file.getPath());
         BufferedReader br = new BufferedReader(new FileReader(file.getPath()));
 
         String First_Line = br.readLine();
@@ -94,14 +102,26 @@ public class DFSAController {
 
 
         Removal_Lambda_Transitions(transition, FinaState);
-
+table.entrySet().forEach(entry->{
+    System.out.println(entry.getKey()+" "+entry.getValue().getStates_trans());
+});
 
         Removal_Of_NonDeterminism(transition);
+        System.out.println("**********");
+        table.entrySet().forEach(entry->{
+            System.out.println(entry.getKey()+" "+entry.getValue().getStates_trans());
+        });
 
         Removal_of_Non_Accessible_States(transition);
-
+        System.out.println("**********");
+        table.entrySet().forEach(entry->{
+            System.out.println(entry.getKey()+" "+entry.getValue().getStates_trans());
+        });
         Merging_Equivalent_States(transition);
-
+        System.out.println("**********");
+        table.entrySet().forEach(entry->{
+            System.out.println(entry.getKey()+" "+entry.getValue().getStates_trans());
+        });
 
     }
 
@@ -110,32 +130,51 @@ public class DFSAController {
         for (int i = 0; i < states.size(); i++) {
             //get the states in transition lambda for each state
             String indexOfLambda = table.get(states.get(i)).getStates_trans().get("@");
+            table.get(states.get(i)).setVisited(true);
 
             //if there are state in lambda transition
             if (indexOfLambda != null) {
                 //if there are multiple states in lambda
                 String[] vars = indexOfLambda.split(",");
-
                 //check each state in lambda
                 for (int j = 0; j < vars.length; j++) {
-
                     //if there is one is final in lambda the state will be also final
                     if (vars[j].equals(Final_state)) {
                         table.get(states.get(i)).setFinal_stat(true);
                     }
 
+                    if (!vars[j].equals(states.get(i))){
                     //get the transition for each state
                     HashMap<String, String> temp = table.get(vars[j]).getStates_trans();
                     for (int k = 0; k < trans.length; k++) {
+                        if (table.get(vars[j]).isVisited() && trans[k].equals("@")){
+                            continue;
+                        }
                         if (temp.get(trans[k]) != null) {
                             String val = table.get(states.get(i)).getStates_trans().get(trans[k]);
-                            if (val != null)
-                                val = val.concat(",").concat(temp.get(trans[k]));
-                            else
-                                val = temp.get(trans[k]);
-                            table.get(states.get(i)).getStates_trans().put(trans[k], val);
-                        }
-                    }
+                                   if (val != null) {
+                                       boolean check;
+                                       String []multiTrans=val.split(",");
+                                       String []secMulti=temp.get(trans[k]).split(",");
+                                       for (int m=0;m<secMulti.length;m++){
+                                           check=true;
+                                           for (int f=0;f<multiTrans.length;f++){
+                                               if (secMulti[m].equals(multiTrans[f]))
+                                                   check=false;
+                                                  // val = val.concat(",").concat(secMulti[m]);
+
+                                           }
+                                           if (check)
+                                               val = val.concat(",").concat(secMulti[m]);
+                                       }
+
+                                   } else
+                                       val = temp.get(trans[k]);
+                                   table.get(states.get(i)).getStates_trans().put(trans[k], val);
+
+
+                           }
+                    }}
                     if (j == vars.length - 1) {
                         indexOfLambda = table.get(states.get(i)).getStates_trans().get("@");
                         String[] vars2 = indexOfLambda.split(",");
@@ -155,6 +194,7 @@ public class DFSAController {
     via check each trans in the state if have more than one state for the same transition
      */
     public void Removal_Of_NonDeterminism(String[] trans) {
+
         for (int j = 0; j < states.size(); j++) {
             States state = table.get(states.get(j));
             HashMap<String, String> HashState = state.getStates_trans();
@@ -162,7 +202,9 @@ public class DFSAController {
                 String indexTransition = entry1.getValue();
 
                 if (indexTransition != null) {
+
                     String[] arrayIndex = indexTransition.split(",");
+                    System.out.println(indexTransition);
                     if (arrayIndex.length > 1 && table.get(indexTransition) == null) {
                         boolean flag = false;
                         HashMap<String, String> HashNew = new HashMap<String, String>();
@@ -173,10 +215,28 @@ public class DFSAController {
                             for (int k = 0; k < trans.length; k++) {
                                 if (temp.get(trans[k]) != null) {
                                     String temp_trans = HashNew.get(trans[k]);
+
                                     if (temp_trans == null)
                                         HashNew.put(trans[k], temp.get(trans[k]));
-                                    else
-                                        HashNew.put(trans[k], temp_trans.concat(",").concat(temp.get(trans[k])));
+                                    else {
+                                        boolean check;
+                                        String []multiTrans=temp_trans.split(",");
+                                        String []secMulti=temp.get(trans[k]).split(",");
+                                        String val=temp_trans;
+
+                                        for (int m=0;m<secMulti.length;m++){
+                                            check=true;
+                                            for (int f=0;f<multiTrans.length;f++){
+                                                if (secMulti[m].equals(multiTrans[f]))
+                                                    check=false;
+                                                // val = val.concat(",").concat(secMulti[m]);
+
+                                            }
+                                            if (check)
+                                                val = val.concat(",").concat(secMulti[m]);
+                                        }
+                                        HashNew.put(trans[k], val);
+                                    }
                                 }
                             }
                         }
@@ -503,7 +563,6 @@ public class DFSAController {
          hashOfLinkedList.entrySet().forEach(entry -> {
             LinkedList<String> temp=entry.getValue();
             for (int j=0;j<temp.size();j++){
-                System.out.println(temp.get(j));
                 for (int k=0;k<states.size();k++){
                     if (table.get(states.get(k))!=null) {
                         if(table.get(states.get(k)).getState().equals(temp.get(j)))
@@ -557,14 +616,8 @@ public class DFSAController {
             else if (state.getStates_trans().get(trans)!=null){
                 state=table.get(state.getStates_trans().get(trans));
             }
-            else return false;
-
-
-        }
-        return true;
-
-
-    }
+            else return false;}
+        return true;   }
 
 
 

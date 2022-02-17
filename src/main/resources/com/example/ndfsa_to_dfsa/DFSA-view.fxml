@@ -10,8 +10,8 @@
 
 <AnchorPane fx:id="pathField" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="502.0" prefWidth="454.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.ndfsa_to_dfsa.DFSAController">
    <children>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1c3b58" height="48.0" stroke="BLACK" strokeType="INSIDE" width="454.0" />
-      <Label layoutX="95.0" layoutY="14.0" text="Convert From NDFSDA to DFSA" textFill="WHITE">
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1c3b58" height="48.0" layoutX="98.0" layoutY="5.0" stroke="BLACK" strokeType="INSIDE" width="255.0" />
+      <Label layoutX="104.0" layoutY="14.0" text="Convert From NDFSDA to DFSA" textFill="WHITE">
          <font>
             <Font name="Andalus" size="19.0" />
          </font>
